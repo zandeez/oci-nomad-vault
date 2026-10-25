@@ -33,7 +33,9 @@
   [http.routers.api]
     rule = "Host(`traefik.matrix.example.com`)"
     service = "api@internal"
-    middlewares = ["platform"]
+    # Dashboard is unauthenticated: private network only. Vault and Nomad stay public because GitLab's hosted
+    # runners call them; both enforce their own token auth.
+    middlewares = ["platform", "internal"]
   [http.routers.vault]
     rule = "Host(`vault.matrix.example.com`)"
     service = "vault"

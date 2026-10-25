@@ -5,6 +5,8 @@
   "role_type": "jwt",
   "jwks_uri": "https://gitlab.com/-/jwks",
   "bound_claims": {
-    "project_id": "<your-gitlab-project-id>"
+    "project_id": "<your-gitlab-project-id>",
+    "ref_type": "branch",
+    "ref_protected": "true"
   }
 }

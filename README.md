@@ -173,10 +173,20 @@ Ways out I'd weigh today:
 - **Single Vault node:** HA is disabled on the Object Storage backend.
 - **CA rotation isn't scheduled.** The script exists, but no Nomad periodic
   job or timer runs it.
-- **The GitLab JWT role is bound only to the project ID.** Any branch can get
-  a Nomad token; the deploy job is manual, not ref-restricted. Binding
-  `ref_protected: "true"` would close that.
 - **Terraform is a stub** (see above).
+
+### Hardening added for publication
+
+- **Traefik dashboard:** it's unauthenticated, but was routed publicly. It's
+  now restricted to the private network by the `internal` IP allow-list,
+  which was already defined but never attached. Vault and Nomad stay
+  publicly routed because GitLab's hosted runners have to reach them; both
+  enforce their own token authentication and ACLs.
+- **GitLab JWT role:** it was bound only to the project ID, so any branch's
+  pipeline could get a Nomad token. It now also requires a protected branch
+  (`ref_type: branch`, `ref_protected: true`).
+- **Nomad `gitlab` policy:** it could mount any host volume. It's now
+  limited to the three the job uses (`postgresql`, `synapse`, `signal`).
 
 ## Sanitisation
 
