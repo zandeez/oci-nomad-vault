@@ -1,0 +1,140 @@
+homeserver:
+  url: "http://10.0.0.44:8008"
+  media_url: "https://matrix.example.com"
+  domain: "example.com"
+  enablePresence: true
+  bindPort: {{ env "NOMAD_PORT_irc" }}
+  bindHostname: 0.0.0.0
+
+ircService:
+  servers:
+    irc.example.net:
+      name: "Bored"
+      additionalAddresses: [ "irc.boredicons.com" ]
+      networkId: "bored"
+      port: 6667
+      ssl: false
+      sslselfsign: false
+      sasl: false
+      allowExpiredCerts: false
+      sendConnectionMessages: true
+
+      quitDebounce:
+        enabled: false
+        quitsPerSecond: 5
+        delayMinMs: 3600000
+        delayMaxMs: 7200000
+
+      modePowerMap:
+        o: 50
+        v: 1
+
+      botConfig:
+        enabled: false
+        nick: MatrixBot
+        username: matrixbot
+        joinChannelsIfNoUsers: true
+
+      privateMessages:
+        enabled: true
+        federate: false
+
+      dynamicChannels:
+        enabled: true
+        createAlias: true
+        published: true
+        joinRule: public
+        federate: false
+        aliasTemplate: "#irc_bored_$CHANNEL"
+
+      membershipLists:
+        enabled: true
+        floodDelayMs: 10000
+
+        global:
+          ircToMatrix:
+            initial: false
+            incremental: false
+          matrixToIrc:
+            initial: false
+            incremental: false
+
+        rooms: [ ]
+
+        channels:
+          - channel: "#cs"
+            ircToMatrix:
+              initial: true
+              incremental: true
+
+        ignoreIdleUsersOnStartup:
+          enabled: true
+          idleForHours: 720
+
+      mappings: { }
+
+      matrixClients:
+        userTemplate: "@irc_$SERVER_$NICK"
+        displayName: "$NICK"
+        joinAttempts: -1
+
+      ircClients:
+        nickTemplate: "$DISPLAY[m]"
+        allowNickChanges: true
+        maxCleints: 30
+        ipv6:
+          only: false
+        idleTimeout: 0
+        reconnectIntervalMs: 5000
+        concurrentReconnectLimit: 50
+        lineLimit: 3
+
+  bridgeInfoState:
+    enabled: true
+    initial: false
+
+  ident:
+    enabled: false
+
+  metrics:
+    enabled: true
+    host: 0.0.0.0
+    userActivityThresholdHours: 72
+    remoteUserAgeBuckets:
+      - "1h"
+      - "1d"
+      - "1w"
+
+  debugApi:
+    enabled: false
+    port: 11100
+
+  provisioning:
+    enabled: true
+    requestTimeoutSeconds: 300
+    enableReload: false
+    roomLimit: 50
+
+  passwordEncryptionKeyPath: "/data/passkey.pem"
+
+  matrixHandler:
+    eventCacheSize: 4096
+
+  ircHandler:
+    mapIrcMentionsToMatrix: on
+
+  permissions:
+    '@admin:example.com': admin
+    '@dimension:example.com': admin
+
+advanced:
+  maxHttpSockets: 1000
+  maxTxnSize: 10000000
+
+sentry:
+  enabled: false
+{{- with secret "database/creds/irc" }}
+database:
+  engine: postgres
+  connectionString: "postgres://{{ .Data.username }}:{{ .Data.password }}@{{ range nomadService "matrix-database-database" }}{{ .Address }}:{{ .Port }}{{ end }}/postgres"
+{{ end }}

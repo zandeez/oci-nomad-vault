@@ -1,0 +1,11 @@
+{
+  "allowed_policies": [
+    "nomad",
+    "default"
+  ],
+  "token_explicit_max_ttl": 0,
+  "name": "nomad",
+  "orphan": true,
+  "token_period": 259200,
+  "renewable": true
+}

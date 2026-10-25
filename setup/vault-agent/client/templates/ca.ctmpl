@@ -1,0 +1,2 @@
+{{ range secrets "pki/issuers" }}{{ with secret (printf "pki/issuer/%s" .) }}{{ .Data.certificate }}
+{{ end }}{{ end }}

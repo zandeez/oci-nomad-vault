@@ -1,0 +1,10 @@
+{
+  "bound_audiences": "gitlab.com",
+  "user_claim": "sub",
+  "token_policies": "gitlab",
+  "role_type": "jwt",
+  "jwks_uri": "https://gitlab.com/-/jwks",
+  "bound_claims": {
+    "project_id": "<your-gitlab-project-id>"
+  }
+}

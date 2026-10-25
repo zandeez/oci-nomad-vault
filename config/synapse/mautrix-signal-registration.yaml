@@ -1,0 +1,17 @@
+{{- with secret "kv/data/signal" -}}
+id: signal
+as_token: {{ .Data.data.as_token }}
+hs_token: {{ .Data.data.hs_token }}
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@signal_.*:example\.com'
+    - exclusive: true
+      regex: '@signalbot:example\.com'
+  aliases: [ ]
+{{ if eq (env "NOMAD_TASK_NAME") "synapse" }}
+url: http://{{ range nomadService "matrix-signal-mautrix-signal" }}{{ .Address }}:{{ .Port }}{{ end }}
+{{ end }}
+sender_localpart: {{ .Data.data.local_part }}
+rate_limited: false
+{{ end }}

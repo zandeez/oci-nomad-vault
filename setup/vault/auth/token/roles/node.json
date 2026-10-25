@@ -1,0 +1,11 @@
+{
+  "allowed_policies": [
+    "node",
+    "default"
+  ],
+  "token_explicit_max_ttl": 0,
+  "name": "node",
+  "orphan": true,
+  "token_period": 259200,
+  "renewable": true
+}

@@ -1,0 +1,1 @@
+{{ with pkiCert "pki/issue/node" "common_name=nomad-x86-64.matrix.example.com" "alt_names=nomad-x86-64.matrix.example.com,client.uk.nomad" "ip_sans=10.0.0.61,127.0.0.1" }}{{ .Data.Key }}{{ .Data.Cert }}{{ end }}

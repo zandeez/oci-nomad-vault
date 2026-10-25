@@ -1,0 +1,11 @@
+#!/bin/bash
+/usr/bin/openssl x509 -in /etc/ssl/key.pem -out /etc/ssl/host.pem
+/usr/bin/systemctl reload vault
+/usr/bin/systemctl reload nomad
+# TODO: need to ensure that vault-agent certs have access to make this change.
+export VAULT_CACERT=/etc/ssl/ca.pem
+export VAULT_CLIENT_CERT=/etc/ssl/host.pem
+export VAULT_CLIENT_KEY=/etc/ssl/key.pem
+/usr/bin/vault login -method=oci auth_type=instance role=node
+/usr/bin/vault write nomad/config/access address=https://127.0.0.1:4646 ca_cert=@/etc/ssl/ca.pem client_cert=@/etc/ssl/host.pem client_key=@/etc/ssl/key.pem
+/usr/bin/systemctl restart vault-agent@pki

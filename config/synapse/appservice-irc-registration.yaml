@@ -1,0 +1,19 @@
+{{- with secret "kv/data/irc" -}}
+id: irc_bridge # Can be any helpful identifier
+as_token: {{ .Data.data.as_token }}
+hs_token: {{ .Data.data.hs_token }}
+{{ end }}
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@irc_.*:example\.com' # localhost should be your homeserver's server_name
+  aliases:
+    - exclusive: true
+      regex: '#irc_.*:example\.com' # localhost should be your homeserver's server_name
+{{ if eq (env "NOMAD_TASK_NAME") "synapse" }}
+url: http://{{ range nomadService "matrix-irc-appservice-irc" }}{{ .Address }}:{{ .Port }}{{ end }}
+{{ end }}
+sender_localpart: irc_bot
+rate_limited: false
+protocols:
+  - irc

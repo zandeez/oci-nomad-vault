@@ -1,0 +1,53 @@
+[http.services.vault.loadBalancer]
+  serversTransport = "vault"
+  [[http.services.vault.loadBalancer.servers]]
+    url = "https://127.0.0.1:8200/"
+[http.services.nomad.loadBalancer]
+  serversTransport = "nomad"
+  [[http.services.nomad.loadBalancer.servers]]
+    url = "https://127.0.0.1:4646/"
+
+[http.middlewares]
+  [http.middlewares.compression.compress]
+  [http.middlewares.forcessl.redirectScheme]
+    scheme = "https"
+    permanent = true
+  [http.middlewares.secureheaders.headers]
+    isDevelopment = false
+    framedeny = true
+    stsSeconds = 63072000
+    stsIncludeSubdomains = true
+    stsPreload = true
+  [http.middlewares.corsheaders.headers]
+    accesscontrolallowmethods = "GET,POST,PUT,DELETE,OPTIONS"
+    accesscontrolallowheaders = "Origin,X-Requested-With,Content-Type,Accept,Authorization"
+    accesscontrolalloworiginlist = "*"
+  [http.middlewares.xforwardedproto.headers.customRequestHeaders]
+    X-Forwarded-Proto = "https"
+  [http.middlewares.platform.chain]
+    middlewares = ["forcessl","secureheaders","compression"]
+  [http.middlewares.internal.ipwhitelist]
+    sourceRange = ["127.0.0.1/32", "10.0.0.0/24"]
+
+[http.routers]
+  [http.routers.api]
+    rule = "Host(`traefik.matrix.example.com`)"
+    service = "api@internal"
+    middlewares = ["platform"]
+  [http.routers.vault]
+    rule = "Host(`vault.matrix.example.com`)"
+    service = "vault"
+    middlewares = ["platform"]
+  [http.routers.nomad]
+    rule = "Host(`nomad.matrix.example.com`)"
+    service = "nomad"
+    middlewares = ["platform"]
+
+[http.serversTransports.nomad]
+  rootCAs = ["/local/ca.pem"]
+  [[http.serversTransports.nomad.certificates]]
+    certFile = "/local/client.pem"
+    keyFile = "/local/client.pem"
+
+[http.serversTransports.vault]
+  rootCAs = ["/local/ca.pem"]

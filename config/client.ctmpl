@@ -1,0 +1,2 @@
+{{ with pkiCert "pki/issue/node" "common_name=traefik-arm.matrix.example.com" "alt_names=traefik-arm.matrix.example.com,client.uk.nomad" "ip_sans=10.0.0.44,127.0.0.1"  }}{{ .Data.Key }}
+{{ .Data.Cert }}{{ end }}

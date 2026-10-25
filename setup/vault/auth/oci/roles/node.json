@@ -1,0 +1,5 @@
+{
+  "token_policies": "node",
+  "token_ttl": "1800",
+  "ocid_list": "REDACTED"
+}

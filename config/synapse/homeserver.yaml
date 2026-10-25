@@ -1,0 +1,70 @@
+server_name: "example.com"
+pid_file: "/alloc/data/homeserver.pid"
+web_client_location: "https://element.example.com/"
+public_baseurl: "https://matrix.example.com/"
+listeners:
+  - port: {{ env "NOMAD_PORT_synapse" }}
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [ client, federation ]
+        compress: false
+limit_remote_rooms:
+retention:
+  enabled: true
+  default_policy:
+    min_lifetime: 1d
+    max_lifetime: 3y
+acme:
+  enabled: false
+caches:
+  per_cache_factors:
+
+database:
+  name: psycopg2
+  args:
+    {{- with secret "database/creds/synapse" }}
+    user: "{{ .Data.username }}"
+    password: "{{ .Data.password }}"
+    {{- end }}
+    database: postgres
+    host: {{ range nomadService "matrix-database-database" }}{{ .Address }}
+    port: {{ .Port }}{{ end }}
+    cp_min: 5
+    cp_max: 10
+log_config: "/alloc/data/example.com.log.config"
+media_store_path: "/alloc/data/media_store"
+url_preview_accept_language:
+turn_uris:
+  - "turn:matrix.example.com?transport=udp"
+  - "turn:matrix.example.com?transport=tcp"
+turn_shared_secret: "{{ with secret "kv/data/coturn" }}{{ .Data.data.secret }}{{ end }}"
+enable_registration: false
+account_validity:
+account_threepid_delegates:
+enable_set_displayname: true
+enable_set_avatar_url: true
+enable_3pid_changes: true
+metrics_flags:
+report_stats: true
+app_service_config_files:
+  - /local/mautrix-signal-registration.yaml
+  - /local/appservice-irc-registration.yaml
+  - /local/slack-registration.yaml
+{{ with secret "kv/data/synapse" -}}
+registration_shared_secret: "{{ .Data.data.registration_token }}"
+macaroon_secret_key: "{{ .Data.data.macaroon_secret_key }}"
+form_secret: "{{ .Data.data.form_secret }}"
+{{ end -}}
+signing_key_path: "/alloc/data/example.com.signing.key"
+suppress_key_server_warning: true
+trusted_key_servers:
+  - server_name: "matrix.org"
+email: # TODO
+  smtp_host:
+  smtp_port:
+  notif_from: "%(app)s homeserver <matrix@example.com>"
+  app_name: example.com
+  client_base_url: "https://element.example.com"
+  invite_client_location: https://element.example.com

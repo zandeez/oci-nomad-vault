@@ -1,0 +1,34 @@
+[serversTransport]
+  rootCAs = ["/local/ca.pem"]
+
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+  [entryPoints.https]
+    address = ":443"
+    [entryPoints.https.http.tls]
+      certresolver = "letsencrypt"
+
+[certificatesResolvers.letsencrypt.acme]
+  email = "admin@example.com"
+  storage = "/alloc/data/acme.json"
+  [certificatesResolvers.letsencrypt.acme.httpChallenge]
+    entryPoint = "http"
+
+[providers]
+  [providers.file]
+    filename = "/local/dynamic.toml"
+
+  [providers.nomad]
+    exposedByDefault = false
+    [providers.nomad.endpoint]
+      address = "https://127.0.0.1:4646"
+      token = "{{ with secret "nomad/creds/traefik" }}{{ .Data.secret_id }}{{ end }}"
+      [providers.nomad.endpoint.tls]
+        ca = "/local/ca.pem"
+        cert = "/local/client.pem"
+        key = "/local/client.pem"
+
+[ping]
+
+[api]

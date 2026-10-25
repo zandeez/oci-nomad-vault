@@ -1,0 +1,9 @@
+#!/bin/bash
+EXPIRES=$(date --utc --date="$(date +'%Y-%m-01') + 2 month" +%Y-%m-%dT%H:%M:%SZ)
+NAME=$(date +%s)
+export VAULT_CACERT=/etc/ssl/ca.pem
+export VAULT_CLIENT_CERT=/etc/ssl/host.pem
+export VAULT_CLIENT_KEY=/etc/ssl/key.pem
+/usr/bin/vault login -method=oci auth_type=instance role=ca
+/usr/bin/vault write pki/root/rotate/internal issuer_name="${NAME}" not_after="${EXPIRES}"
+/usr/bin/vault write pki/root/replace default="${NAME}"
