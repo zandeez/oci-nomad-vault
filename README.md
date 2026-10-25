@@ -155,6 +155,14 @@ Ways out I'd weigh today:
 3. **Remove the architecture split.** Build arm64 images of the two bridges,
    or replace them, then run Synapse and its bridges in a single group.
 
+At this scale I'd take option 1, though I'm not entirely happy with it.
+Every Synapse↔bridge call would hairpin through the ingress: east-west
+traffic leaving through the edge proxy and coming back in, adding a hop and
+coupling internal calls to the ingress's availability. Giving Traefik a
+separate entrypoint on the private network keeps that traffic off the public
+listener and out of the NAT path, but it's still a detour, not service
+discovery. If the stack grew, I'd move to option 2.
+
 ## Layout
 
 | Path | Purpose |
