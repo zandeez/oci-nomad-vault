@@ -8,7 +8,8 @@ credentials, and Vault itself unseals through the cloud KMS.
 
 > **Status: never went to production (2023).** The platform pieces worked.
 > The Matrix workload stalled on two-way service discovery between the
-> homeserver and its bridges across nodes of different CPU architectures. See
+> homeserver and its bridges across nodes of different CPU architectures, and
+> I retired it in favour of Signal rather than keep running a homeserver. See
 > [Why the Matrix workload never shipped](#why-the-matrix-workload-never-shipped).
 > This is a sanitised snapshot of a private repository with squashed history
 > (162 commits, Apr–Aug 2023).
@@ -162,6 +163,21 @@ coupling internal calls to the ingress's availability. Giving Traefik a
 separate entrypoint on the private network keeps that traffic off the public
 listener and out of the NAT path, but it's still a detour, not service
 discovery. If the stack grew, I'd move to option 2.
+
+Underneath, this is a consequence of Matrix's design. Appservices are
+HTTP push in both directions, so a homeserver and its bridges have to be able
+to *find each other*: a cycle. If they both made outbound connections to a
+message bus, the graph would be a star around one well-known address: start
+order wouldn't matter, events would queue across restarts, and node placement
+and CPU architecture would be irrelevant. The cost is a stateful broker to run
+and cluster. Matrix keeps the queue's guarantees anyway, since Synapse delivers
+to appservices in numbered transactions and retries with backoff until
+acknowledged. It just delivers them over a connection in the direction that
+causes the problem.
+
+In the end I didn't fix it. I moved my own messaging to Signal, because
+running a homeserver wasn't giving me enough value to justify the upkeep. The
+platform underneath is the part of this repo worth reading.
 
 ## Layout
 
